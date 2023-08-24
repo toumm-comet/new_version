@@ -2,21 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:new_version/new_version.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key});
+
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<StatefulWidget> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -27,18 +30,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // Instantiate NewVersion manager object (Using GCP Console app as example)
     final newVersion = NewVersion(
       iOSId: 'com.google.Vespa',
-      androidId: 'com.google.android.apps.cloudconsole',
+      androidId: 'app.refrigerant.trakref.trakrefapp',
     );
 
     // You can let the plugin handle fetching the status and showing a dialog,
     // or you can fetch the status and display your own dialog, or no dialog.
-    const simpleBehavior = true;
-
-    if (simpleBehavior) {
-      basicStatusCheck(newVersion);
-    } else {
-      advancedStatusCheck(newVersion);
-    }
+    basicStatusCheck(newVersion);
   }
 
   basicStatusCheck(NewVersion newVersion) {
@@ -47,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   advancedStatusCheck(NewVersion newVersion) async {
     final status = await newVersion.getVersionStatus();
-    if (status != null) {
+    if (status != null && context.mounted) {
       debugPrint(status.releaseNotes);
       debugPrint(status.appStoreLink);
       debugPrint(status.localVersion);
@@ -66,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Example App"),
+        title:const Text("Example App"),
       ),
     );
   }
