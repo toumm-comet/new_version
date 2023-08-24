@@ -92,7 +92,7 @@ class NewVersion {
   /// with buttons to dismiss the update alert, or go to the app store.
   showAlertIfNecessary({required BuildContext context}) async {
     final VersionStatus? versionStatus = await getVersionStatus();
-    if (versionStatus != null && versionStatus.canUpdate) {
+    if (versionStatus != null && versionStatus.canUpdate && context.mounted) {
       showUpdateDialog(context: context, versionStatus: versionStatus);
     }
   }
@@ -107,8 +107,8 @@ class NewVersion {
     } else if (Platform.isAndroid) {
       return _getAndroidStoreVersion(packageInfo);
     } else {
-      debugPrint(
-          'The target platform "${Platform.operatingSystem}" is not yet supported by this package.');
+      debugPrint('The target platform "${Platform.operatingSystem}" is not yet supported by this package.');
+      throw 'The target platform "${Platform.operatingSystem}" is not yet supported by this package.'; 
     }
   }
 
@@ -180,7 +180,7 @@ class NewVersion {
     } else {
       final scriptElements = document.getElementsByTagName('script');
       final infoScriptElement = scriptElements.firstWhere(
-            (elm) => elm.text.contains('key: \'ds:4\''),
+            (elm) => elm.text.contains('key: \'ds:5\''),
       );
 
       final param = infoScriptElement.text.substring(20, infoScriptElement.text.length - 2)
@@ -190,10 +190,10 @@ class NewVersion {
           .replaceAll('sideChannel:', '"sideChannel":')
           .replaceAll('\'', '"');
       final parsed = json.decode(param);
-      final data =  parsed['data'];
+      final List data =  parsed['data'] ?? [];
 
-      storeVersion = data[1][2][140][0][0][0];
-      releaseNotes = data[1][2][144][1][1];
+      storeVersion = data.isNotEmpty ? "${data[1]?[2]?[140]?[0][0]?[0]?? "0.0.0" }": "0.0.0";
+      releaseNotes = data.isNotEmpty ? "${data[1]?[2]?[144]?[1]?[1] ?? ""}": "";
     }
 
     return VersionStatus._(
@@ -286,8 +286,8 @@ class NewVersion {
   /// Launches the Apple App Store or Google Play Store page for the app.
   Future<void> launchAppStore(String appStoreLink) async {
     debugPrint(appStoreLink);
-    if (await canLaunch(appStoreLink)) {
-      await launch(appStoreLink);
+    if (await canLaunchUrl(Uri.parse(appStoreLink))) {
+      await launchUrl(Uri.parse(appStoreLink), mode: LaunchMode.externalApplication);
     } else {
       throw 'Could not launch appStoreLink';
     }
